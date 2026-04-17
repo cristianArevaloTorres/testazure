@@ -1,0 +1,41 @@
+service: lockton-orion-api
+
+frameworkVersion: '4'
+
+provider:
+  name: azure
+  region: East US
+  runtime: dotnetIsolated
+  os: windows
+
+  prefix: lockton-orion
+  resourceGroup: lockton-orion-${opt:stage, 'dev'}-rg
+
+  subscriptionId: ${env:AZURE_SUBSCRIPTION_ID}
+  tenantId: ${env:AZURE_TENANT_ID}
+  appId: ${env:AZURE_CLIENT_ID}
+  appSecret: ${env:AZURE_CLIENT_SECRET}
+
+  storageAccount:
+    name: locktonorion${opt:stage, 'dev'}stor
+
+  appServicePlan:
+    name: lockton-orion-${opt:stage, 'dev'}-api-asp
+    kind: app
+    sku:
+      name: B1
+      tier: Basic
+
+  webApp:
+    name: lockton-orion-${opt:stage, 'dev'}-api
+    appSettings:
+      ASPNETCORE_ENVIRONMENT: ${opt:stage, 'dev'}
+      WEBSITE_RUN_FROM_PACKAGE: '1'
+
+plugins:
+  - serverless-azure-functions
+
+package:
+  artifact: src/LocktonOrion.API/bin/Release/net8.0/publish/LocktonOrion.API.zip
+
+functions: {}

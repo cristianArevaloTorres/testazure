@@ -1,0 +1,21 @@
+{
+  "name": "locktonorion.functions",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "dotnet publish -c Release -o bin/Release/net8.0/publish",
+    "package": "dotnet publish -c Release -o bin/Release/net8.0/publish && powershell -Command \"Compress-Archive -Force -Path bin/Release/net8.0/publish/* -DestinationPath bin/Release/net8.0/publish/LocktonOrion.Functions.zip\"",
+    "deploy:dev": "npm run package && serverless deploy --stage dev",
+    "deploy:prod": "npm run package && serverless deploy --stage prod",
+    "remove:dev": "serverless remove --stage dev",
+    "remove:prod": "serverless remove --stage prod"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "serverless-azure-functions": "^2.2.1"
+  }
+}

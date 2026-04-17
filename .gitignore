@@ -23,6 +23,11 @@ frontend/dist/
 frontend/.env
 frontend/.env.*
 
+# Serverless
+src/LocktonOrion.Functions/node_modules/
+.serverless/
+src/LocktonOrion.Functions/.serverless/
+
 # Playwright browsers
 **/playwright-browsers/
 **/ms-playwright/
