@@ -181,14 +181,14 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
-// Auto-migrate y seed en desarrollo
-if (app.Environment.IsDevelopment())
+// Auto-migrate on startup (all environments)
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var seedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     await db.Database.MigrateAsync();
-    await LocktonOrion.Infrastructure.Persistence.DbSeeder.SeedAsync(db, seedLogger);
+    if (app.Environment.IsDevelopment())
+        await LocktonOrion.Infrastructure.Persistence.DbSeeder.SeedAsync(db, seedLogger);
 }
 
 Log.Information("Lockton Orion API starting on {Environment}", app.Environment.EnvironmentName);
