@@ -186,9 +186,14 @@ app.MapHealthChecks("/health");
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var seedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    await db.Database.MigrateAsync();
-    if (app.Environment.IsDevelopment())
-        await LocktonOrion.Infrastructure.Persistence.DbSeeder.SeedAsync(db, seedLogger);
+
+    // SQLite doesn't support EF migrations in this setup – use EnsureCreated instead
+    if (db.Database.IsSqlite())
+        await db.Database.EnsureCreatedAsync();
+    else
+        await db.Database.MigrateAsync();
+
+    await LocktonOrion.Infrastructure.Persistence.DbSeeder.SeedAsync(db, seedLogger);
 }
 
 Log.Information("Lockton Orion API starting on {Environment}", app.Environment.EnvironmentName);

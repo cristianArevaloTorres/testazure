@@ -19,11 +19,20 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Database
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection"),
-                sql => sql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
+        // Database – choose provider based on connection string prefix
+        var connStr = configuration.GetConnectionString("DefaultConnection") ?? "";
+        if (connStr.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlite(connStr));
+        }
+        else
+        {
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(
+                    connStr,
+                    sql => sql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
+        }
 
         // Repositories
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -34,8 +43,16 @@ public static class DependencyInjection
         services.AddScoped<IEncryptionService, EncryptionService>();
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 
-        // Messaging
-        services.AddSingleton<IServiceBusPublisher, ServiceBusPublisher>();
+        // Messaging – optional: skip if connection string is missing
+        var sbConnectionString = configuration["AzureServiceBus:ConnectionString"];
+        if (!string.IsNullOrWhiteSpace(sbConnectionString))
+        {
+            services.AddSingleton<IServiceBusPublisher, ServiceBusPublisher>();
+        }
+        else
+        {
+            services.AddSingleton<IServiceBusPublisher, NullServiceBusPublisher>();
+        }
 
         // AI
         services.AddHttpClient<IAIService, ClaudeAIService>();
@@ -46,10 +63,8 @@ public static class DependencyInjection
         // Control del simulador (singleton para compartir estado entre controller y BackgroundService)
         services.AddSingleton<ScrapingControlService>();
 
-        // Simulador de scraping local (reemplaza Azure Functions en desarrollo)
-        var env = configuration["ASPNETCORE_ENVIRONMENT"] ?? "Production";
-        if (env == "Development")
-            services.AddHostedService<ScrapingSimulatorService>();
+        // Simulador de scraping (activo en todos los environments)
+        services.AddHostedService<ScrapingSimulatorService>();
 
         return services;
     }

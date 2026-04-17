@@ -522,73 +522,106 @@ public static class DbSeeder
 
     private static async Task SeedQuotationResultsAsync(AppDbContext db, ILogger logger)
     {
-        if (await db.QuotationResults.AnyAsync()) return;
-
-        logger.LogInformation("Insertando resultados de cotización de prueba...");
-
         var q1 = Guid.Parse("00000000-0000-0000-0005-000000000001"); // COT-2026-0001 Auto - Completed
         var gnpId      = Guid.Parse("00000000-0000-0000-0002-000000000001");
         var qualitasId = Guid.Parse("00000000-0000-0000-0002-000000000002");
         var axaId      = Guid.Parse("00000000-0000-0000-0002-000000000003");
 
-        var results = new List<QuotationResult>
-        {
-            new()
-            {
-                Id = Guid.Parse("00000000-0000-0000-0007-000000000001"),
-                QuotationRequestId = q1,
-                InsurerId = gnpId,
-                ProductName = "GNP Auto Clásico — Amplia",
-                AnnualPremium  = 12_480m,
-                MonthlyPremium = 1_040m,
-                Deductible     = 5_000m,
-                IsRecommended  = true,
-                RecommendationScore = 87,
-                RecommendationReason = "Mejor equilibrio precio-cobertura. Incluye asistencia vial 24/7 y cobertura de robo total.",
-                CoverageDetailsJson = """{"dañosMateriales":true,"roboTotal":true,"roboParcialesPiezas":true,"responsabilidadCivil":3000000,"gastosMedicos":200000,"asistenciaVial":true,"autoSustituto":15,"cristales":true,"equipo_especial":false}""",
-                ValidUntil = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30)),
-                ScrapedAt = DateTimeOffset.UtcNow.AddDays(-5),
-                CreatedBy = "seed", CreatedAt = DateTimeOffset.UtcNow.AddDays(-5)
-            },
-            new()
-            {
-                Id = Guid.Parse("00000000-0000-0000-0007-000000000002"),
-                QuotationRequestId = q1,
-                InsurerId = qualitasId,
-                ProductName = "Quálitas Auto Plus — Amplia",
-                AnnualPremium  = 10_920m,
-                MonthlyPremium = 910m,
-                Deductible     = 8_000m,
-                IsRecommended  = false,
-                RecommendationScore = 74,
-                RecommendationReason = "Prima anual más baja, pero deducible mayor y sin auto sustituto.",
-                CoverageDetailsJson = """{"dañosMateriales":true,"roboTotal":true,"roboParcialesPiezas":false,"responsabilidadCivil":2000000,"gastosMedicos":100000,"asistenciaVial":true,"autoSustituto":0,"cristales":false,"equipo_especial":false}""",
-                ValidUntil = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30)),
-                ScrapedAt = DateTimeOffset.UtcNow.AddDays(-5),
-                CreatedBy = "seed", CreatedAt = DateTimeOffset.UtcNow.AddDays(-5)
-            },
-            new()
-            {
-                Id = Guid.Parse("00000000-0000-0000-0007-000000000003"),
-                QuotationRequestId = q1,
-                InsurerId = axaId,
-                ProductName = "AXA Auto Ejecutivo — Premium",
-                AnnualPremium  = 15_960m,
-                MonthlyPremium = 1_330m,
-                Deductible     = 3_000m,
-                IsRecommended  = false,
-                RecommendationScore = 82,
-                RecommendationReason = "Cobertura más completa y menor deducible, pero prima anual más alta.",
-                CoverageDetailsJson = """{"dañosMateriales":true,"roboTotal":true,"roboParcialesPiezas":true,"responsabilidadCivil":5000000,"gastosMedicos":300000,"asistenciaVial":true,"autoSustituto":30,"cristales":true,"equipo_especial":true}""",
-                ValidUntil = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30)),
-                ScrapedAt = DateTimeOffset.UtcNow.AddDays(-5),
-                CreatedBy = "seed", CreatedAt = DateTimeOffset.UtcNow.AddDays(-5)
-            },
-        };
+        // WordPress mshots: servicio público gratuito, sin API key
+        const string gnpScreenshot      = "https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.gnp.com.mx%2Fcotiza-tu-seguro?w=1280&h=720";
+        const string qualitasScreenshot = "https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.qualitas.com.mx?w=1280&h=720";
+        const string axaScreenshot      = "https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.axa.com.mx%2Fseguros?w=1280&h=720";
 
-        db.QuotationResults.AddRange(results);
-        await db.SaveChangesAsync();
-        logger.LogInformation("3 resultados de cotización insertados (COT-2026-0001).");
+        if (!await db.QuotationResults.AnyAsync())
+        {
+            logger.LogInformation("Insertando resultados de cotización de prueba...");
+
+            var results = new List<QuotationResult>
+            {
+                new()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0007-000000000001"),
+                    QuotationRequestId = q1,
+                    InsurerId = gnpId,
+                    ProductName = "GNP Auto Clásico — Amplia",
+                    AnnualPremium  = 12_480m,
+                    MonthlyPremium = 1_040m,
+                    Deductible     = 5_000m,
+                    IsRecommended  = true,
+                    RecommendationScore = 87,
+                    RecommendationReason = "Mejor equilibrio precio-cobertura. Incluye asistencia vial 24/7 y cobertura de robo total.",
+                    CoverageDetailsJson = """{"dañosMateriales":true,"roboTotal":true,"roboParcialesPiezas":true,"responsabilidadCivil":3000000,"gastosMedicos":200000,"asistenciaVial":true,"autoSustituto":15,"cristales":true,"equipo_especial":false}""",
+                    ScreenshotUrl = gnpScreenshot,
+                    ValidUntil = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30)),
+                    ScrapedAt = DateTimeOffset.UtcNow.AddDays(-5),
+                    CreatedBy = "seed", CreatedAt = DateTimeOffset.UtcNow.AddDays(-5)
+                },
+                new()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0007-000000000002"),
+                    QuotationRequestId = q1,
+                    InsurerId = qualitasId,
+                    ProductName = "Quálitas Auto Plus — Amplia",
+                    AnnualPremium  = 10_920m,
+                    MonthlyPremium = 910m,
+                    Deductible     = 8_000m,
+                    IsRecommended  = false,
+                    RecommendationScore = 74,
+                    RecommendationReason = "Prima anual más baja, pero deducible mayor y sin auto sustituto.",
+                    CoverageDetailsJson = """{"dañosMateriales":true,"roboTotal":true,"roboParcialesPiezas":false,"responsabilidadCivil":2000000,"gastosMedicos":100000,"asistenciaVial":true,"autoSustituto":0,"cristales":false,"equipo_especial":false}""",
+                    ScreenshotUrl = qualitasScreenshot,
+                    ValidUntil = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30)),
+                    ScrapedAt = DateTimeOffset.UtcNow.AddDays(-5),
+                    CreatedBy = "seed", CreatedAt = DateTimeOffset.UtcNow.AddDays(-5)
+                },
+                new()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0007-000000000003"),
+                    QuotationRequestId = q1,
+                    InsurerId = axaId,
+                    ProductName = "AXA Auto Ejecutivo — Premium",
+                    AnnualPremium  = 15_960m,
+                    MonthlyPremium = 1_330m,
+                    Deductible     = 3_000m,
+                    IsRecommended  = false,
+                    RecommendationScore = 82,
+                    RecommendationReason = "Cobertura más completa y menor deducible, pero prima anual más alta.",
+                    CoverageDetailsJson = """{"dañosMateriales":true,"roboTotal":true,"roboParcialesPiezas":true,"responsabilidadCivil":5000000,"gastosMedicos":300000,"asistenciaVial":true,"autoSustituto":30,"cristales":true,"equipo_especial":true}""",
+                    ScreenshotUrl = axaScreenshot,
+                    ValidUntil = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30)),
+                    ScrapedAt = DateTimeOffset.UtcNow.AddDays(-5),
+                    CreatedBy = "seed", CreatedAt = DateTimeOffset.UtcNow.AddDays(-5)
+                },
+            };
+
+            db.QuotationResults.AddRange(results);
+            await db.SaveChangesAsync();
+            logger.LogInformation("3 resultados de cotización insertados (COT-2026-0001).");
+        }
+        else
+        {
+            // Patch existing seeded results that are missing their screenshot URL
+            var patches = new Dictionary<Guid, string>
+            {
+                { Guid.Parse("00000000-0000-0000-0007-000000000001"), gnpScreenshot },
+                { Guid.Parse("00000000-0000-0000-0007-000000000002"), qualitasScreenshot },
+                { Guid.Parse("00000000-0000-0000-0007-000000000003"), axaScreenshot },
+            };
+
+            var existing = await db.QuotationResults
+                .Where(r => patches.Keys.Contains(r.Id) &&
+                            (r.ScreenshotUrl == null || r.ScreenshotUrl.Contains("thum.io")))
+                .ToListAsync();
+
+            if (existing.Count > 0)
+            {
+                foreach (var r in existing)
+                    r.ScreenshotUrl = patches[r.Id];
+
+                await db.SaveChangesAsync();
+                logger.LogInformation("Patched {Count} seeded QuotationResults with ScreenshotUrl.", existing.Count);
+            }
+        }
     }
 
     // ─────────────────────────── BULK: CLIENTES (4-30) ──────────────────
