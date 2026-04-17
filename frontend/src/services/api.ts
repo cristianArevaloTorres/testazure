@@ -70,8 +70,8 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest)
       } catch (refreshError) {
         processQueue(refreshError, null)
+        // Clear auth state – ProtectedRoute will redirect to /login via React Router (no full page reload)
         useAuthStore.getState().clearAuth()
-        window.location.href = '/login'
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false
