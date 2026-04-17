@@ -37,6 +37,18 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config as typeof error.config & { _retry?: boolean }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Don't attempt refresh for the auth endpoints themselves
+      const url = originalRequest.url ?? ''
+      if (url.includes('/auth/')) {
+        return Promise.reject(error)
+      }
+
+      // Don't attempt refresh with demo token
+      const currentToken = useAuthStore.getState().accessToken
+      if (currentToken === 'demo-token') {
+        return Promise.reject(error)
+      }
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
