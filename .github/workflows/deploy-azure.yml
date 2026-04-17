@@ -1,10 +1,10 @@
 name: Deploy to Azure (Production)
 
-# Triggered when a PR is merged into main
+# Triggered when a PR is merged into prod
 on:
   push:
     branches:
-      - main
+      - prod
 
 env:
   DOTNET_VERSION: '8.0.x'
