@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, Loader2, RefreshCw, Clock, CheckCircle2, AlertCircle, Zap, Pause, Play, Trash2 } from 'lucide-react'
+import { Search, Loader2, RefreshCw, RotateCcw, Clock, CheckCircle2, AlertCircle, Zap, Pause, Play, Trash2 } from 'lucide-react'
 import apiClient from '@/services/api'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
