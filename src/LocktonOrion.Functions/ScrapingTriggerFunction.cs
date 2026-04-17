@@ -32,7 +32,6 @@ public class ScrapingTriggerFunction
             "quotation-requests",
             "scraping-service",
             Connection = "AzureServiceBus:ConnectionString")] ServiceBusReceivedMessage message,
-        ServiceBusMessageActions messageActions,
         CancellationToken ct)
     {
         _logger.LogInformation("Processing scraping message {MessageId}", message.MessageId);
@@ -45,9 +44,8 @@ public class ScrapingTriggerFunction
 
             if (payload is null)
             {
-                _logger.LogError("Invalid message payload for MessageId {MessageId}", message.MessageId);
-                await messageActions.DeadLetterMessageAsync(message, null, "InvalidPayload", "Cannot deserialize message", ct);
-                return;
+                _logger.LogError("Invalid message payload for MessageId {MessageId}. Sending to DLQ via throw.", message.MessageId);
+                throw new InvalidOperationException("Cannot deserialize message payload.");
             }
 
             var quotation = await _context.QuotationRequests
@@ -56,8 +54,7 @@ public class ScrapingTriggerFunction
             if (quotation is null)
             {
                 _logger.LogError("Quotation {QuotationId} not found", payload.QuotationId);
-                await messageActions.DeadLetterMessageAsync(message, null, "QuotationNotFound", $"Quotation {payload.QuotationId} not found", ct);
-                return;
+                throw new InvalidOperationException($"Quotation {payload.QuotationId} not found.");
             }
 
             // Update status to Processing
@@ -144,8 +141,6 @@ public class ScrapingTriggerFunction
 
             await _context.SaveChangesAsync(ct);
 
-            await messageActions.CompleteMessageAsync(message, ct);
-
             _logger.LogInformation(
                 "Scraping completed for quotation {QuotationId}. Success: {AnySuccess}, Insurers: {Count}",
                 payload.QuotationId, anySuccess, insurers.Count);
@@ -154,29 +149,20 @@ public class ScrapingTriggerFunction
         {
             _logger.LogError(ex, "Fatal error processing scraping message {MessageId}", message.MessageId);
 
-            if (message.DeliveryCount >= 5)
+            if (message.DeliveryCount >= 5 && payload is not null)
             {
-                _logger.LogError("Max retries exceeded for message {MessageId}. Sending to DLQ.", message.MessageId);
-                await messageActions.DeadLetterMessageAsync(message, null,
-                    "MaxRetriesExceeded", ex.Message, ct);
-
-                if (payload is not null)
+                _logger.LogError("Max retries exceeded for message {MessageId}.", message.MessageId);
+                var quotation = await _context.QuotationRequests
+                    .FirstOrDefaultAsync(q => q.Id == payload.QuotationId, ct);
+                if (quotation is not null)
                 {
-                    var quotation = await _context.QuotationRequests
-                        .FirstOrDefaultAsync(q => q.Id == payload.QuotationId, ct);
-                    if (quotation is not null)
-                    {
-                        quotation.Status = QuotationStatus.Failed;
-                        quotation.LastErrorMessage = $"Max retries exceeded: {ex.Message}";
-                        await _context.SaveChangesAsync(ct);
-                    }
+                    quotation.Status = QuotationStatus.Failed;
+                    quotation.LastErrorMessage = $"Max retries exceeded: {ex.Message}";
+                    await _context.SaveChangesAsync(ct);
                 }
             }
-            else
-            {
-                // Let Service Bus retry with exponential backoff
-                throw;
-            }
+            // Always re-throw so Service Bus handles retry / DLQ
+            throw;
         }
     }
 }
