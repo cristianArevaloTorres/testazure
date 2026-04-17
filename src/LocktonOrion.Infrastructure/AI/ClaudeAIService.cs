@@ -27,8 +27,18 @@ public class ClaudeAIService : IAIService
 
     public async Task<AIResponse> SendMessageAsync(AIRequest request, CancellationToken ct = default)
     {
-        var apiKey = _configuration["Anthropic:ApiKey"]
-            ?? throw new InvalidOperationException("Anthropic API key not configured");
+        var apiKey = _configuration["Anthropic:ApiKey"];
+        if (string.IsNullOrWhiteSpace(apiKey) || apiKey.StartsWith("REPLACE_"))
+        {
+            _logger.LogWarning("Anthropic API key not configured. AI service is disabled.");
+            return new AIResponse(
+                Content: "El servicio de IA no está disponible en este momento. Configure la clave de API de Anthropic para habilitarlo.",
+                Model: "unavailable",
+                InputTokens: 0,
+                OutputTokens: 0,
+                ElapsedMs: 0
+            );
+        }
 
         var model = request.Model ?? DefaultModel;
         var maxTokens = request.MaxTokens ?? 1024;

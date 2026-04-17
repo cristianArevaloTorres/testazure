@@ -12,6 +12,12 @@ appsettings.Staging.json
 appsettings.Development.json
 src/LocktonOrion.Functions/local.settings.json
 
+# Publish artifacts
+**/publish/
+src/LocktonOrion.API/publish/
+src/LocktonOrion.Functions/publish/
+infra/node_modules/
+
 # Rider / VS Code
 .idea/
 *.iml
