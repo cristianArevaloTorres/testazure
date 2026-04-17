@@ -64,13 +64,11 @@ export default function DashboardPage() {
             Vista general del sistema LOCKTON ORION
           </p>
         </div>
-        <Button
-          as={Link}
-          to="/quotations/new"
-          leftIcon={<Plus className="w-4 h-4" />}
-        >
-          Nueva Cotización
-        </Button>
+        <Link to="/quotations/new">
+          <Button leftIcon={<Plus className="w-4 h-4" />}>
+            Nueva Cotización
+          </Button>
+        </Link>
       </div>
 
       {/* Metrics row (Admin/Supervisor only) */}
