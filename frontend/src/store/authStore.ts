@@ -29,7 +29,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'lockton-orion-auth',
-      storage: createJSONStorage(() => sessionStorage), // sessionStorage, not localStorage
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
         accessToken: state.accessToken,
