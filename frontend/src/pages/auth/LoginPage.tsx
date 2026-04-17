@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Shield, Eye, EyeOff, AlertCircle, Zap, ChevronRight } from "lucide-react"
 import { authService } from "@/services/authService"
 import StarField from "@/components/ui/StarField"
+import { APP_VERSION } from "@/version"
 
 const EASE: [number,number,number,number] = [0.22, 1, 0.36, 1]
 
@@ -339,6 +340,13 @@ export default function LoginPage() {
               </motion.div>
             </motion.div>
           </div>
+        </div>
+
+        {/* Version */}
+        <div className="text-center mt-3">
+          <span className="text-[11px] text-orion-text-muted/50 font-mono tracking-widest">
+            v{APP_VERSION}
+          </span>
         </div>
 
         {/* Reflection */}
