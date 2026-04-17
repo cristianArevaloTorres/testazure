@@ -1,0 +1,26 @@
+{
+  "version": "2.0",
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "excludedTypes": "Request"
+      }
+    },
+    "logLevel": {
+      "default": "Information",
+      "Host.Results": "Error",
+      "Function": "Information",
+      "Host.Aggregator": "Trace"
+    }
+  },
+  "extensions": {
+    "serviceBus": {
+      "prefetchCount": 10,
+      "maxConcurrentCalls": 5,
+      "maxConcurrentSessions": 8,
+      "sessionIdleTimeout": "00:01:00",
+      "autoCompleteMessages": false
+    }
+  }
+}

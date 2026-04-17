@@ -1,0 +1,51 @@
+# .NET Build outputs
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.DotSettings
+
+# .NET secrets — NEVER commit
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.Development.json
+src/LocktonOrion.Functions/local.settings.json
+
+# Rider / VS Code
+.idea/
+*.iml
+.vscode/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.*
+
+# Playwright browsers
+**/playwright-browsers/
+**/ms-playwright/
+
+# Logs
+*.log
+logs/
+
+# Publish output
+publish/
+/out/
+
+# Docker
+.dockerenv
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# EF Core migrations snapshot (optional — keep if team uses code-first)
+# **/Migrations/
+
+# Azure Functions local state
+.azure/
+.funcignore
