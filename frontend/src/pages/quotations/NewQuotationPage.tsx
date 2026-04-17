@@ -135,13 +135,67 @@ export default function NewQuotationPage() {
   const STEPS = ['Tipo de Seguro', 'Datos del Riesgo', 'Datos del Cliente', 'Confirmar']
 
   // ── Forms por tipo ────────────────────────────────────────────────────────
-  const autoForm = useForm<AutoData>({ resolver: zodResolver(autoSchema) })
-  const lifeForm = useForm<LifeData>({ resolver: zodResolver(lifeSchema) })
-  const healthForm = useForm<HealthData>({ resolver: zodResolver(healthSchema) })
-  const homeForm = useForm<HomeData>({ resolver: zodResolver(homeSchema) })
-  const businessForm = useForm<BusinessData>({ resolver: zodResolver(businessSchema) })
-  const travelForm = useForm<TravelData>({ resolver: zodResolver(travelSchema) })
-  const liabilityForm = useForm<LiabilityData>({ resolver: zodResolver(liabilitySchema) })
+  const autoForm = useForm<AutoData>({
+    resolver: zodResolver(autoSchema),
+    defaultValues: {
+      use: 'Personal',
+      coverageType: 'Amplia',
+      maritalStatus: 'Soltero',
+      driverLicenseYears: 0,
+    },
+  })
+  const lifeForm = useForm<LifeData>({
+    resolver: zodResolver(lifeSchema),
+    defaultValues: {
+      gender: 'Masculino',
+      policyType: 'Temporal10',
+      isSmoker: 'No',
+    },
+  })
+  const healthForm = useForm<HealthData>({
+    resolver: zodResolver(healthSchema),
+    defaultValues: {
+      gender: 'Masculino',
+      coverageType: 'Individual',
+      membersCount: 1,
+      desiredDeductible: 0,
+      hasPreexistingConditions: 'No',
+      maternityRider: 'No',
+      dentalRider: 'No',
+    },
+  })
+  const homeForm = useForm<HomeData>({
+    resolver: zodResolver(homeSchema),
+    defaultValues: {
+      propertyType: 'Casa',
+      constructionType: 'Mampostería',
+      isOwner: 'Propietario',
+      contentsValue: 0,
+    },
+  })
+  const businessForm = useForm<BusinessData>({
+    resolver: zodResolver(businessSchema),
+    defaultValues: {
+      employeesCount: 1,
+      annualRevenue: 0,
+    },
+  })
+  const travelForm = useForm<TravelData>({
+    resolver: zodResolver(travelSchema),
+    defaultValues: {
+      tripType: 'Nacional',
+      coverageAmount: 0,
+      travelersCount: 1,
+    },
+  })
+  const liabilityForm = useForm<LiabilityData>({
+    resolver: zodResolver(liabilitySchema),
+    defaultValues: {
+      liabilityType: 'Civil',
+      annualRevenue: 0,
+      employeesCount: 0,
+    },
+  })
 
   const step3Form = useForm<Step3Data>({ resolver: zodResolver(step3Schema) })
 
@@ -515,20 +569,20 @@ export default function NewQuotationPage() {
                 <span className="text-sm text-orion-text-muted">Cliente ID</span>
                 <span className="text-xs font-mono text-orion-text-primary">{requestData.clientId as string}</span>
               </div>
-              {Object.entries(requestData)
+              {Object.entries(requestData as Record<string, unknown>)
                 .filter(([k]) => !['clientId', 'notes'].includes(k))
                 .map(([k, v]) => (
                   <div key={k} className="flex justify-between py-1.5">
                     <span className="text-xs text-orion-text-muted capitalize">{k.replace(/([A-Z])/g, ' $1')}</span>
-                    <span className="text-xs text-orion-text-primary">{String(v)}</span>
+                    <span className="text-xs text-orion-text-primary">{v != null ? String(v) : ''}</span>
                   </div>
                 ))}
-              {requestData.notes && (
+              {(requestData as Record<string, unknown>).notes ? (
                 <div className="flex justify-between py-2 border-t border-orion-border mt-1">
                   <span className="text-sm text-orion-text-muted">Notas</span>
-                  <span className="text-sm text-orion-text-primary">{requestData.notes as string}</span>
+                  <span className="text-sm text-orion-text-primary">{String((requestData as Record<string, unknown>).notes ?? '')}</span>
                 </div>
-              )}
+              ) : null}
             </div>
             {error && <p className="text-sm text-red-400 mt-3">{error}</p>}
             <div className="mt-4 p-3 bg-orion-primary/5 rounded-lg border border-orion-primary/20">
