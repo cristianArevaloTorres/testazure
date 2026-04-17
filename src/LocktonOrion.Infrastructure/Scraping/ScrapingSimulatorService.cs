@@ -157,7 +157,7 @@ public class ScrapingSimulatorService : BackgroundService
             .Include(j => j.QuotationRequest)
             .Include(j => j.Insurer)
             .Where(j => j.Status == ScrapingJobStatus.Queued)
-            .OrderBy(j => j.CreatedAt)
+            .OrderBy(j => j.Id)  // Use Id (Guid/string) instead of DateTimeOffset for SQLite compatibility
             .Take(3)
             .ToListAsync(ct);
 
@@ -267,10 +267,18 @@ public class ScrapingSimulatorService : BackgroundService
             RecommendationReason = cfg.Reasons[idx],
             ValidUntil          = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30)),
             ScrapedAt           = DateTimeOffset.UtcNow,
-            ScreenshotUrl       = null, // Playwright no corre en simulador — se genera en producción
+            ScreenshotUrl       = BuildScreenshotUrl(insurer),
             CreatedBy           = "simulator",
             CreatedAt           = DateTimeOffset.UtcNow
         };
+    }
+
+    private static string? BuildScreenshotUrl(Insurer insurer)
+    {
+        var targetUrl = insurer.PortalUrl ?? insurer.Website;
+        if (string.IsNullOrWhiteSpace(targetUrl)) return null;
+        // WordPress mshots: servicio público gratuito, sin API key, fiable
+        return $"https://s.wordpress.com/mshots/v1/{Uri.EscapeDataString(targetUrl)}?w=1280&h=720";
     }
 
     private static async Task TryCompleteQuotationAsync(AppDbContext db, Guid quotationId, CancellationToken ct)

@@ -68,7 +68,7 @@ public class QuotationRequestConfiguration : IEntityTypeConfiguration<QuotationR
         builder.Property(q => q.ReferenceNumber).HasMaxLength(50).IsRequired();
         builder.Property(q => q.InsuranceType).HasConversion<string>().HasMaxLength(20);
         builder.Property(q => q.Status).HasConversion<string>().HasMaxLength(30);
-        builder.Property(q => q.RequestDataJson).HasColumnType("nvarchar(max)");
+        builder.Property(q => q.RequestDataJson).HasColumnType("TEXT");
         builder.Property(q => q.AdvisorNotes).HasMaxLength(2000);
         builder.Property(q => q.InternalNotes).HasMaxLength(2000);
         builder.Property(q => q.LastErrorMessage).HasMaxLength(1000);
@@ -97,7 +97,7 @@ public class QuotationResultConfiguration : IEntityTypeConfiguration<QuotationRe
         builder.Property(r => r.MonthlyPremium).HasPrecision(18, 2);
         builder.Property(r => r.Deductible).HasPrecision(18, 2);
         builder.Property(r => r.RecommendationScore).HasPrecision(5, 2);
-        builder.Property(r => r.CoverageDetailsJson).HasColumnType("nvarchar(max)");
+        builder.Property(r => r.CoverageDetailsJson).HasColumnType("TEXT");
         builder.Property(r => r.RecommendationReason).HasMaxLength(500);
         builder.Property(r => r.PolicyNumber).HasMaxLength(100);
         builder.Property(r => r.SourceUrl).HasMaxLength(500);
@@ -125,7 +125,7 @@ public class InsurerConfiguration : IEntityTypeConfiguration<Insurer>
         builder.Property(i => i.Website).HasMaxLength(500);
         builder.Property(i => i.PortalUrl).HasMaxLength(500);
         builder.Property(i => i.Rating).HasPrecision(3, 1);
-        builder.Property(i => i.ScrapingConfigJson).HasColumnType("nvarchar(max)");
+        builder.Property(i => i.ScrapingConfigJson).HasColumnType("TEXT");
         builder.Property(i => i.ContactEmail).HasMaxLength(256);
         builder.Property(i => i.ContactPhone).HasMaxLength(20);
     }
@@ -162,8 +162,8 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
         builder.Property(a => a.Action).HasMaxLength(100).IsRequired();
         builder.Property(a => a.EntityName).HasMaxLength(100).IsRequired();
         builder.Property(a => a.EntityId).HasMaxLength(100);
-        builder.Property(a => a.OldValues).HasColumnType("nvarchar(max)");
-        builder.Property(a => a.NewValues).HasColumnType("nvarchar(max)");
+        builder.Property(a => a.OldValues).HasColumnType("TEXT");
+        builder.Property(a => a.NewValues).HasColumnType("TEXT");
         builder.Property(a => a.IpAddress).HasMaxLength(45);
         builder.Property(a => a.UserAgent).HasMaxLength(500);
         builder.Property(a => a.Endpoint).HasMaxLength(500);
